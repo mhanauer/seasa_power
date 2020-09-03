@@ -48,6 +48,7 @@ n = as.list(n)
 
 items = list()
 out = list()
+out_sim = list()
 chi_p_out = list()
 cfi_out= list()
 tli_out= list()
@@ -61,13 +62,13 @@ dat[[i]] = generate(CFA.Model,n[[i]])
 items[[i]] = apply(dat[[i]],2, function(x){CutQ(x, breaks = quantile(x, c(0, .05, .15, .30, .45, .60, .75, .85, .95, 1)), labels = c(1:9))})
 items[[i]] = apply(items[[i]], 2, function(x){as.numeric(x)})
 out[[i]] = analyze(CFA.Model, items[[i]])
-out_sum[[i]] =  summary(out[[i]], fit.measures=TRUE,  standardized = TRUE)
-out_sum[[i]]$FIT[c(5,9,10,17,21)]
-chi_p_out[[i]] =  ifelse(out_sum[[i]]$FIT[c(5)] < .05, 1, 0)
-cfi_out[[i]] =  ifelse(out_sum[[i]]$FIT[c(9)] >= .95, 1, 0)
-tli_out[[i]] =  ifelse(out_sum[[i]]$FIT[c(10)] >= .95, 1, 0)
-rmsea_out[[i]] =  ifelse(out_sum[[i]]$FIT[c(17)] < .05, 1, 0)
-srmr_out[[i]] =  ifelse(out_sum[[i]]$FIT[c(21)] < .08, 1, 0)
+out_sim[[i]] =  summary(out[[i]], fit.measures=TRUE,  standardized = TRUE)
+out_sim[[i]]$FIT[c(5,9,10,17,21)]
+chi_p_out[[i]] =  ifelse(out_sim[[i]]$FIT[c(5)] > .05, 1, 0)
+cfi_out[[i]] =  ifelse(out_sim[[i]]$FIT[c(9)] >= .95, 1, 0)
+tli_out[[i]] =  ifelse(out_sim[[i]]$FIT[c(10)] >= .95, 1, 0)
+rmsea_out[[i]] =  ifelse(out_sim[[i]]$FIT[c(17)] < .05, 1, 0)
+srmr_out[[i]] =  ifelse(out_sim[[i]]$FIT[c(21)] < .08, 1, 0)
 results_out[[i]] = list(chi_p_out[[i]], cfi_out[[i]], tli_out[[i]], rmsea_out[[i]], srmr_out[[i]])
 }
 #chi-p, cfi, tli, rmsea, srmr five rows
