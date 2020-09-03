@@ -1,4 +1,4 @@
----
+a---
 title: "Diss Power"
 output: html_document
 ---
@@ -42,7 +42,7 @@ Cut the data function
 Then run loop over function for varying n's
 Then write code to grab the CFI, TLI, RMSEA, and SRMR
 ```{r}
-n = rep(c(seq(from = 90, to = 400, by =50)), each =10)
+n = rep(c(seq(from = 100, to = 400, by =50)), each =10)
 n_samples = n
 n = as.list(n)
 
@@ -92,37 +92,25 @@ power_dat = data.frame(sum_dat, count = count_dat$n)
 power_dat[,2:6] =round(power_dat[,2:6]/ power_dat$count,2)
 power_dat$count = NULL
 power_dat
+
+library(reshape2)
+
+power_long <- melt(power_dat, id.vars=c(1))
+power_long
+colnames(power_long) = c("n", "criteria", "power")
+power_long
+
 ```
-Power using criteria in Kline and stated in dissertation
+Graph the power analysis
 ```{r}
 
-power_dat_list = list(Output_80@fit, Output_90@fit, Output_100@fit, Output_110@fit)
-power_results = list()
-test_power = list()
-chi_square_power = list()
-cfi_power = list()
-rmsea_power = list()
-tli_power = list()
-srmr_power = list()
-results_power = list()
+library(ggplot2)
+power_long %>%
+  ggplot( aes(x=n, y=power, group=criteria, color=criteria)) +
+    geom_line()+
+    geom_hline(yintercept=.8, linetype="dashed", color = "red")+
+  ggtitle("Figure 1: SEASA power analysis")
 
 
-
-for(i in 1:length(power_dat_list)){
-  chi_square_power[[i]] = sum(ifelse(power_dat_list[[i]]$pvalue >= .05, 1, 0)/ dim(power_dat_list[[i]])[1])
-  rmsea_power[[i]] = sum(ifelse(power_dat_list[[i]]$rmsea <= .05, 1, 0)) / dim(power_dat_list[[i]])[1]
-  cfi_power[[i]] = sum(ifelse(power_dat_list[[i]]$cfi >= .95, 1, 0)) / dim(power_dat_list[[i]])[1]
-  tli_power[[i]] = sum(ifelse(power_dat_list[[i]]$tli >= .95, 1, 0)) / dim(power_dat_list[[i]])[1]
-  srmr_power[[i]] = sum(ifelse(power_dat_list[[i]]$srmr <= .08, 1, 0)) / dim(power_dat_list[[i]])[1]
-  results_power[[i]] = data.frame(chi_square_power[[i]], rmsea_power[[i]], cfi_power[[i]],  tli_power[[i]], srmr_power[[i]]) 
-}
-results_power = unlist(results_power)
-results_power = matrix(results_power, ncol = 5, nrow = 4, byrow = TRUE)  
-results_power = data.frame(results_power)
-colnames(results_power) = c("chi_square", "rmsea", "cfi", "tli", "srmr")
-n = seq(from= 80, to = 110, by = 10)
-results_power = data.frame(n, results_power)
-results_power = round(results_power, 2)
-results_power
-write.csv(results_power, "results_power.csv", row.names = FALSE)
 ```
+
